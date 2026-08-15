@@ -332,6 +332,7 @@ body.filter-unpacked .item-row[data-state="packed"] { display:none; }
           <div class="progress-fill" id="prog-fill" style="width:0%"></div>
         </div>
         <span class="progress-pct" id="prog-pct">0%</span>
+        <span id="prog-total" style="font-size:12px;color:var(--text-light);white-space:nowrap;">0 פריטים</span>
       </div>
       <button class="btn btn-outline" id="filter-btn" onclick="toggleFilter()">👁 הצג חסרים</button>
       <button class="btn btn-outline" onclick="resetAll()">אפס</button>
@@ -368,7 +369,7 @@ const FB = {
 };
 let db=null;
 try{ firebase.initializeApp(FB); db=firebase.firestore(); }catch(e){}
-const DOC = ()=> db ? db.collection('montenegro_checklist').doc('packing') : null;
+const DOC = ()=> db ? db.collection('montenegro_checklist').doc('packing_v2') : null;
 
 // ── DEFAULTS ──────────────────────────────────────────────────────────────
 const DEFAULTS = {
@@ -598,6 +599,7 @@ function updateProgress() {
   const pct = total ? Math.round(packed/total*100) : 0;
   document.getElementById('prog-fill').style.width = pct+'%';
   document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-total').textContent = packed + '/' + total + ' פריטים';
 }
 
 // ── DRAG & DROP ───────────────────────────────────────────────────────────
