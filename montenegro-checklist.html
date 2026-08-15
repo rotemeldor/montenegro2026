@@ -16,362 +16,308 @@
   --teal-light: #3D8F8F;
   --teal-pale: #E8F2F2;
   --terracotta: #C4603A;
-  --sand: #A08060;
   --charcoal: #2C2825;
   --text: #1A1210;
   --text-muted: #6B5040;
   --text-light: #9A8878;
   --green: #2E7D4F;
-  --green-bg: #EAF5EE;
   --grey-col: #B0A898;
-  --sidebar-w: 200px;
-  --header-h: 54px;
-  --bar-h: 56px;
+  --top-h: 54px;
+  --cat-h: 46px;
+  --bar-h: 58px;
+  --base: 16.5px;
 }
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Heebo', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { scroll-behavior:smooth; }
+body { font-family:'Heebo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; font-size:var(--base); }
 
-/* ── HEADER ── */
-.header {
-  position: fixed; top:0; left:0; right:0; z-index:300;
-  height: var(--header-h);
-  background: var(--charcoal);
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+/* ── TOP HEADER ── */
+.top-header {
+  position:fixed; top:0; left:0; right:0; z-index:400;
+  height:var(--top-h);
+  background:var(--charcoal);
+  display:flex; align-items:center; gap:10px; padding:0 14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
 }
-.header-title {
-  font-size: 16px; font-weight: 700; color: white; flex:1;
-}
-.header-title span { color: #A8D5D5; font-weight: 300; font-size: 13px; }
-.sync-badge {
-  font-size: 11px; color: rgba(255,255,255,.55);
-  display: flex; align-items: center; gap: 4px; white-space: nowrap;
-}
-.sync-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: #4CAF50;
-  animation: pulse 2s infinite; flex-shrink:0;
-}
-.sync-dot.off { background: #E57373; animation: none; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.top-title { font-size:15px; font-weight:700; color:white; flex:1; line-height:1.2; }
+.top-title small { display:block; font-weight:300; font-size:11px; color:#A8D5D5; }
+.sync-badge { display:flex; align-items:center; gap:4px; font-size:11px; color:rgba(255,255,255,.55); white-space:nowrap; }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:#4CAF50; animation:pulse 2s infinite; flex-shrink:0; }
+.sync-dot.off { background:#E57373; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.35} }
 
-/* ── BOTTOM ACTION BAR ── */
-.bottom-bar {
-  position: fixed; bottom:0; left:0; right:0; z-index:300;
-  height: var(--bar-h);
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 12px;
-  box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+/* ── CATEGORY NAV BAR ── */
+.cat-nav {
+  position:fixed; top:var(--top-h); left:0; right:0; z-index:300;
+  height:var(--cat-h);
+  background:var(--surface);
+  border-bottom:2px solid var(--border);
+  display:flex; align-items:stretch;
+  overflow-x:auto; overflow-y:hidden;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
 }
-.bottom-bar input {
-  flex:1; font-family:'Heebo',sans-serif; font-size:15px;
-  padding: 8px 12px; border: 1.5px solid var(--border);
-  border-radius: 10px; background: var(--bg); color: var(--text);
-  outline:none; text-align:right; min-width:0;
+.cat-nav::-webkit-scrollbar { display:none; }
+.cat-tab {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:0 14px; cursor:pointer; white-space:nowrap;
+  border-bottom:3px solid transparent;
+  font-size:13px; font-weight:600; color:var(--text-muted);
+  transition:all .18s; flex-shrink:0; gap:1px;
+  position:relative; -webkit-user-select:none; user-select:none;
 }
-.bottom-bar input:focus { border-color: var(--teal); }
-.bottom-bar input::placeholder { color: var(--text-light); }
-.bottom-bar select {
-  font-family:'Heebo',sans-serif; font-size:13px;
-  padding: 8px 8px; border: 1.5px solid var(--border);
-  border-radius: 10px; background: var(--bg); color: var(--text-muted);
-  outline:none; max-width: 100px; flex-shrink:0;
-}
-.btn-add {
-  font-family:'Heebo',sans-serif; font-size:15px; font-weight:700;
-  width: 42px; height: 42px; border-radius: 50%; border:none;
-  background: var(--teal); color: white; cursor:pointer; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow: 0 2px 8px rgba(42,107,107,.4);
-  transition: background .15s, transform .1s;
-}
-.btn-add:active { background: var(--teal-light); transform: scale(.95); }
+.cat-tab:active { background:var(--teal-pale); }
+.cat-tab.active { color:var(--teal); border-bottom-color:var(--teal); background:var(--teal-pale); }
+.cat-tab .tab-icon { font-size:16px; }
+.cat-tab .tab-count { font-size:10px; font-weight:700; color:var(--text-light); }
+.cat-tab.active .tab-count { color:var(--teal); }
 
-/* ── LAYOUT ── */
-.layout {
-  display: flex;
-  padding-top: var(--header-h);
-  padding-bottom: calc(var(--bar-h) + 8px);
-  min-height: 100vh;
-}
+/* drop highlight on tab */
+.cat-tab.drop-target { background:rgba(42,107,107,.18); border-bottom-color:var(--teal-light); }
 
-/* ── SIDEBAR ── */
-.sidebar {
-  position: fixed;
-  top: var(--header-h); bottom: var(--bar-h);
-  right: 0; width: var(--sidebar-w);
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  overflow-y: auto; overflow-x: hidden;
-  z-index:200;
-  -webkit-overflow-scrolling: touch;
+/* ── PROGRESS STRIP ── */
+.progress-strip {
+  position:fixed; top:calc(var(--top-h) + var(--cat-h)); left:0; right:0; z-index:200;
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:8px 14px; display:flex; align-items:center; gap:10px;
 }
-.sidebar-label {
-  font-size: 10px; font-weight:700; letter-spacing:.14em;
-  text-transform:uppercase; color: var(--text-light);
-  padding: 14px 14px 8px; display:block;
+.prog-track { flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+.prog-fill { height:100%; background:var(--green); border-radius:3px; transition:width .4s ease; }
+.prog-pct { font-size:13px; font-weight:700; color:var(--green); white-space:nowrap; }
+.prog-total { font-size:11px; color:var(--text-light); white-space:nowrap; }
+.btn-filter {
+  font-family:'Heebo',sans-serif; font-size:12px; font-weight:600;
+  padding:5px 11px; border-radius:8px; border:1.5px solid var(--border);
+  background:var(--surface); color:var(--text-muted); cursor:pointer; white-space:nowrap;
+  transition:all .15s; flex-shrink:0;
 }
-.sidebar-link {
-  display:flex; align-items:center; gap:6px;
-  padding: 10px 14px; cursor:pointer;
-  font-size: 13px; font-weight:500; color: var(--text-muted);
-  border-right: 3px solid transparent;
-  transition: all .15s; text-decoration:none;
-  -webkit-user-select:none; user-select:none;
-}
-.sidebar-link:hover, .sidebar-link:active { background: var(--teal-pale); color: var(--teal); }
-.sidebar-link.active { border-right-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
-.sidebar-link .si-icon { font-size:15px; flex-shrink:0; }
-.sidebar-link .si-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.si-count {
-  font-size:10px; font-weight:700;
-  background: var(--border); color: var(--text-light);
-  padding: 1px 5px; border-radius:8px; flex-shrink:0;
-}
-.sidebar-dropzone {
-  margin: 2px 8px; padding: 7px 8px;
-  border: 2px dashed transparent; border-radius:8px;
-  font-size:11px; color: var(--text-light); text-align:center;
-  display:none; transition: all .2s;
-}
-.sidebar-dropzone.vis { display:block; }
-.sidebar-dropzone.over { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
+.btn-filter.on { background:var(--teal-pale); color:var(--teal); border-color:var(--teal-light); }
 
-/* ── MAIN ── */
-.main {
-  flex:1; margin-right: var(--sidebar-w);
-  padding: 16px 14px 16px 10px;
-  min-width:0;
+/* ── CONTENT OFFSET ── */
+.content {
+  padding-top:calc(var(--top-h) + var(--cat-h) + 38px);
+  padding-bottom:calc(var(--bar-h) + 16px);
 }
-
-/* ── TOOLBAR ── */
-.toolbar {
-  display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center;
-}
-.progress-wrap {
-  flex:1; display:flex; align-items:center; gap:10px; min-width:160px;
-}
-.progress-track { flex:1; height:7px; background: var(--border); border-radius:4px; overflow:hidden; }
-.progress-fill { height:100%; background: var(--green); border-radius:4px; transition: width .4s ease; }
-.progress-pct { font-size:13px; font-weight:700; color: var(--green); white-space:nowrap; min-width:32px; }
-.btn {
-  font-family:'Heebo',sans-serif; font-size:13px; font-weight:600;
-  padding: 7px 14px; border-radius:9px; border:none; cursor:pointer;
-  transition: all .15s; white-space:nowrap;
-  -webkit-user-select:none; user-select:none;
-}
-.btn:active { transform: scale(.96); }
-.btn-teal { background: var(--teal); color:white; }
-.btn-teal:hover { background: var(--teal-light); }
-.btn-outline { background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); }
-.btn-outline:hover { border-color: var(--teal); color: var(--teal); }
-.btn-active { background: var(--teal-pale); color: var(--teal); border: 1.5px solid var(--teal-light); }
-
-/* ── ADD CATEGORY ── */
-.add-cat-row {
-  display:flex; gap:8px; margin-bottom:14px;
-}
-.add-cat-input {
-  flex:1; font-family:'Heebo',sans-serif; font-size:14px;
-  padding: 8px 12px; border: 1.5px solid var(--border);
-  border-radius:10px; background: var(--surface); color: var(--text);
-  outline:none; text-align:right; min-width:0;
-}
-.add-cat-input:focus { border-color: var(--teal); }
-.add-cat-input::placeholder { color: var(--text-light); }
 
 /* ── CAT SECTION ── */
-.cat-section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  margin-bottom: 12px;
-  overflow:hidden;
-  transition: box-shadow .2s, border-color .2s;
-}
-.cat-section.drag-over-cat { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal-pale); }
+.cat-section { display:none; }
+.cat-section.visible { display:block; }
 
-.cat-header {
+.cat-section-header {
   display:flex; align-items:center; gap:8px;
-  padding: 12px 14px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  cursor:pointer; -webkit-user-select:none; user-select:none;
-  min-height: 48px;
+  padding:14px 14px 10px;
 }
-.cat-icon { font-size:18px; flex-shrink:0; }
-.cat-name { font-size:16px; font-weight:700; color: var(--charcoal); flex:1; }
-.cat-stats { font-size:12px; color: var(--text-light); flex-shrink:0; }
-.cat-del { 
-  background:none; border:none; color: var(--text-light); font-size:16px;
-  cursor:pointer; padding:4px 6px; border-radius:6px; flex-shrink:0;
-  opacity:.5; transition: opacity .15s;
+.csh-icon { font-size:22px; }
+.csh-name { font-size:18px; font-weight:700; color:var(--charcoal); flex:1; }
+.csh-stats { font-size:13px; color:var(--text-light); }
+.btn-add-cat-item {
+  font-family:'Heebo',sans-serif; font-size:13px; font-weight:600;
+  padding:6px 14px; border-radius:9px; border:none;
+  background:var(--teal); color:white; cursor:pointer;
 }
-.cat-del:active { opacity:1; color: var(--terracotta); }
-.cat-chevron { font-size:11px; color: var(--text-light); flex-shrink:0; transition: transform .2s; }
-.cat-section.collapsed .cat-chevron { transform: rotate(180deg); }
-.cat-section.collapsed .items-list,
-.cat-section.collapsed .cat-empty { display:none; }
 
 /* ── ITEMS ── */
-.items-list { padding: 4px 0; min-height:10px; }
-
-.cat-empty {
-  padding: 12px 14px;
-  text-align:center; font-size:13px; color: var(--text-light);
-  border: 2px dashed transparent; margin: 6px 10px;
-  border-radius:8px; transition: all .2s;
-}
-.cat-empty.over { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
+.items-list { padding:4px 0 8px; }
 
 .item-row {
   display:flex; align-items:center; gap:10px;
-  padding: 11px 14px;
-  border-bottom: 1px solid rgba(226,221,213,.5);
-  transition: background .12s;
-  position:relative; min-height: 48px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(226,221,213,.6);
+  transition:background .12s; min-height:52px;
+  position:relative;
 }
 .item-row:last-child { border-bottom:none; }
-.item-row.dragging { opacity:.35; }
-.item-row.drop-above { border-top: 2.5px solid var(--teal); }
 
-/* drag handle — hidden on mobile, visible on desktop */
-.drag-handle {
-  color: var(--text-light); font-size:16px;
-  cursor:grab; opacity:.4; flex-shrink:0;
-  touch-action: none;
-  padding: 4px 2px;
+/* long-press dragging state */
+.item-row.lp-dragging {
+  background:var(--teal-pale);
+  border-radius:10px;
+  box-shadow:0 3px 16px rgba(42,107,107,.2);
+  z-index:10;
 }
-.item-row:hover .drag-handle { opacity:.8; }
-@media(hover:none) { .drag-handle { opacity:.3; } }
 
-/* CHECKBOX — large touch target */
+/* CHECKBOX */
 .item-check {
-  width:26px; height:26px; border-radius:7px;
-  border: 2px solid var(--border);
-  flex-shrink:0; cursor:pointer;
+  width:28px; height:28px; min-width:28px; border-radius:8px;
+  border:2px solid var(--border); flex-shrink:0; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  transition: all .18s; background:white;
-  min-width:26px; min-height:26px;
+  transition:all .18s; background:white;
 }
 .item-check svg { display:none; }
-
-.item-row[data-state="packed"] .item-check {
-  background: var(--green); border-color: var(--green);
-}
+.item-row[data-state="packed"] .item-check { background:var(--green); border-color:var(--green); }
 .item-row[data-state="packed"] .item-check svg { display:block; }
 .item-row[data-state="packed"] .item-label {
-  color: var(--green);
-  text-decoration: line-through;
-  text-decoration-color: rgba(46,125,79,.4);
+  color:var(--green); text-decoration:line-through;
+  text-decoration-color:rgba(46,125,79,.4);
 }
-.item-row[data-state="grey"] .item-label { color: var(--grey-col); }
-.item-row[data-state="grey"] .item-check { border-color: #DDD; opacity:.65; }
+.item-row[data-state="grey"] .item-label { color:var(--grey-col); }
+.item-row[data-state="grey"] .item-check { border-color:#DDD; opacity:.65; }
 
 .item-label {
-  flex:1; font-size:15px; color: var(--text);
-  transition: color .18s; min-width:0;
-  word-break: break-word;
-  outline:none; cursor:text;
-  -webkit-user-select:text; user-select:text;
+  flex:1; font-size:var(--base); color:var(--text);
+  transition:color .18s; min-width:0; word-break:break-word;
+  outline:none; -webkit-user-select:text; user-select:text;
 }
-.item-label:empty::before { content:attr(data-placeholder); color:var(--text-light); }
 
 .item-del {
-  background:none; border:none; color: var(--text-light);
-  font-size:18px; cursor:pointer; padding:4px 6px;
-  border-radius:6px; flex-shrink:0; opacity:.35;
-  transition: opacity .15s; min-width:32px; min-height:32px;
+  background:none; border:none; color:var(--text-light);
+  font-size:20px; cursor:pointer; padding:4px 6px;
+  border-radius:6px; flex-shrink:0; opacity:.3;
+  min-width:34px; min-height:34px;
   display:flex; align-items:center; justify-content:center;
+  transition:opacity .15s;
 }
-.item-row:hover .item-del { opacity:.6; }
-.item-del:active { opacity:1; color: var(--terracotta); }
+.item-row:hover .item-del, .item-del:active { opacity:1; color:var(--terracotta); }
 
-/* ── FILTER (show only unpacked) ── */
+/* move button — shown during long-press mode */
+.item-move {
+  display:none; background:var(--teal); border:none; border-radius:8px;
+  color:white; font-family:'Heebo',sans-serif; font-size:12px; font-weight:600;
+  padding:5px 10px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+body.move-mode .item-row.lp-dragging .item-move { display:flex; }
+
+/* MOVE MODE overlay hint on tabs */
+body.move-mode .cat-tab { border-bottom-color:rgba(42,107,107,.3); }
+body.move-mode .cat-tab::after {
+  content:'העבר כאן';
+  position:absolute; bottom:2px;
+  font-size:9px; color:var(--teal); font-weight:700; letter-spacing:.03em;
+}
+
+/* filter */
 body.filter-unpacked .item-row[data-state="packed"] { display:none; }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width:4px; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius:4px; }
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  position:fixed; bottom:0; left:0; right:0; z-index:400;
+  height:var(--bar-h); background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex; align-items:center; gap:8px; padding:0 12px;
+  box-shadow:0 -2px 12px rgba(0,0,0,.07);
+}
+.bottom-bar input {
+  flex:1; font-family:'Heebo',sans-serif; font-size:15px;
+  padding:9px 12px; border:1.5px solid var(--border);
+  border-radius:10px; background:var(--bg); color:var(--text);
+  outline:none; text-align:right; min-width:0;
+}
+.bottom-bar input:focus { border-color:var(--teal); }
+.bottom-bar input::placeholder { color:var(--text-light); }
+.btn-add {
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--teal); color:white; font-size:22px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  box-shadow:0 2px 8px rgba(42,107,107,.35); transition:all .15s;
+}
+.btn-add:active { transform:scale(.93); background:var(--teal-light); }
+
+/* ── ADD CAT ── */
+.add-cat-row {
+  display:flex; gap:8px; padding:12px 14px 4px;
+}
+.add-cat-input {
+  flex:1; font-family:'Heebo',sans-serif; font-size:14px;
+  padding:8px 12px; border:1.5px solid var(--border);
+  border-radius:10px; background:var(--surface); color:var(--text);
+  outline:none; text-align:right; min-width:0;
+}
+.add-cat-input:focus { border-color:var(--teal); }
+.add-cat-input::placeholder { color:var(--text-light); }
+.btn-sm {
+  font-family:'Heebo',sans-serif; font-size:13px; font-weight:600;
+  padding:8px 14px; border-radius:10px; border:none;
+  background:var(--teal); color:white; cursor:pointer; white-space:nowrap;
+}
+
+/* MOVE MODAL */
+.move-modal {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(28,20,16,.55); align-items:flex-end; justify-content:center;
+}
+.move-modal.open { display:flex; }
+.move-modal-box {
+  background:var(--surface); border-radius:18px 18px 0 0;
+  padding:20px 16px 36px; width:100%; max-width:480px;
+}
+.move-modal-title {
+  font-size:15px; font-weight:700; color:var(--charcoal);
+  margin-bottom:14px; text-align:center;
+}
+.move-cat-btn {
+  display:flex; align-items:center; gap:10px;
+  width:100%; padding:13px 14px; margin-bottom:8px;
+  border:1.5px solid var(--border); border-radius:12px;
+  background:var(--bg); cursor:pointer; font-family:'Heebo',sans-serif;
+  font-size:15px; font-weight:500; color:var(--text-muted);
+  transition:all .15s;
+}
+.move-cat-btn:active { background:var(--teal-pale); color:var(--teal); border-color:var(--teal); }
+.move-cancel {
+  width:100%; padding:12px; margin-top:4px;
+  border:none; border-radius:12px; background:transparent;
+  font-family:'Heebo',sans-serif; font-size:14px; color:var(--text-light);
+  cursor:pointer; font-weight:600;
+}
+
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-title">Montenegro 2026 <span>— אריזה</span></div>
+<!-- HEADER -->
+<header class="top-header">
+  <div class="top-title">Montenegro 2026 <small>רשימת אריזה</small></div>
   <div class="sync-badge">
     <span id="sync-text">...</span>
     <span class="sync-dot off" id="sync-dot"></span>
   </div>
 </header>
 
-<div class="layout">
+<!-- CATEGORY NAV -->
+<nav class="cat-nav" id="cat-nav"></nav>
 
-  <!-- SIDEBAR -->
-  <nav class="sidebar" id="sidebar">
-    <span class="sidebar-label">קטגוריות</span>
-    <div id="sidebar-nav"></div>
-  </nav>
+<!-- PROGRESS STRIP -->
+<div class="progress-strip">
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <span class="prog-pct" id="prog-pct">0%</span>
+  <span class="prog-total" id="prog-total"></span>
+  <button class="btn-filter" id="filter-btn" onclick="toggleFilter()">👁 חסרים</button>
+</div>
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- TOOLBAR -->
-    <div class="toolbar">
-      <div class="progress-wrap">
-        <div class="progress-track">
-          <div class="progress-fill" id="prog-fill" style="width:0%"></div>
-        </div>
-        <span class="progress-pct" id="prog-pct">0%</span>
-        <span id="prog-total" style="font-size:12px;color:var(--text-light);white-space:nowrap;">0 פריטים</span>
-      </div>
-      <button class="btn btn-outline" id="filter-btn" onclick="toggleFilter()">👁 הצג חסרים</button>
-      
-    </div>
-
-    <!-- ADD CATEGORY -->
-    <div class="add-cat-row">
-      <input class="add-cat-input" id="new-cat-inp" placeholder="קטגוריה חדשה..."
-        onkeydown="if(event.key==='Enter')addCat()">
-      <button class="btn btn-teal" onclick="addCat()">+ קטגוריה</button>
-    </div>
-
-    <div id="cats-container"></div>
-  </main>
+<!-- CONTENT -->
+<div class="content" id="content">
+  <div class="add-cat-row">
+    <input class="add-cat-input" id="new-cat-inp" placeholder="קטגוריה חדשה..."
+      onkeydown="if(event.key==='Enter')addCat()">
+    <button class="btn-sm" onclick="addCat()">+ הוסף</button>
+  </div>
+  <div id="cats-container"></div>
 </div>
 
 <!-- BOTTOM BAR -->
 <div class="bottom-bar">
-  <select id="bar-cat-sel"></select>
-  <input id="bar-item-inp" type="text" placeholder="פריט חדש..."
+  <input id="bar-inp" type="text" placeholder="הוסף פריט לקטגוריה הנוכחית..."
     onkeydown="if(event.key==='Enter')addItemFromBar()">
   <button class="btn-add" onclick="addItemFromBar()">+</button>
 </div>
 
-<script>
-// ── FIREBASE ──────────────────────────────────────────────────────────────
-const FB = {
-  apiKey:"AIzaSyBiaqQ20D9DmYKu0ShvY8qwGR9HWjMvLxg",
-  authDomain:"asl-bets.firebaseapp.com",
-  projectId:"asl-bets",
-  storageBucket:"asl-bets.firebasestorage.app",
-  messagingSenderId:"308373695574",
-  appId:"1:308373695574:web:7a46493636c25a51971ff7"
-};
-let db=null;
-try{ firebase.initializeApp(FB); db=firebase.firestore(); }catch(e){}
-const DOC = ()=> db ? db.collection('montenegro_checklist').doc('packing_v2') : null;
+<!-- MOVE MODAL -->
+<div class="move-modal" id="move-modal" onclick="closeMoveModal()">
+  <div class="move-modal-box" onclick="event.stopPropagation()">
+    <div class="move-modal-title">העבר פריט לקטגוריה:</div>
+    <div id="move-modal-cats"></div>
+    <button class="move-cancel" onclick="closeMoveModal()">ביטול</button>
+  </div>
+</div>
 
-// ── DEFAULTS ──────────────────────────────────────────────────────────────
+<script>
+const FB={apiKey:"AIzaSyBiaqQ20D9DmYKu0ShvY8qwGR9HWjMvLxg",authDomain:"asl-bets.firebaseapp.com",projectId:"asl-bets",storageBucket:"asl-bets.firebasestorage.app",messagingSenderId:"308373695574",appId:"1:308373695574:web:7a46493636c25a51971ff7"};
+let db=null;
+try{firebase.initializeApp(FB);db=firebase.firestore();}catch(e){}
+const DOC=()=>db?db.collection('montenegro_checklist').doc('packing_v2'):null;
+
 const DEFAULTS = {
   categories:[
     {id:'c1',name:'כללי',icon:'📋',order:0},
@@ -455,103 +401,88 @@ const DEFAULTS = {
   ]
 };
 
-// ── STATE ─────────────────────────────────────────────────────────────────
-let S = {categories:[], items:[]};
-let filterOn = false;
-let dragId = null, dragFromCat = null;
 
-// ── FIREBASE SYNC ─────────────────────────────────────────────────────────
-function initSync() {
-  const ref = DOC();
-  if (!ref) { S = JSON.parse(JSON.stringify(DEFAULTS)); render(); return; }
-  ref.onSnapshot(snap => {
+let S={categories:[],items:[]};
+let activeCat=null;
+let filterOn=false;
+let movingItemId=null;
+
+// ── FIREBASE ──────────────────────────────────────────────────────────────
+function initSync(){
+  const ref=DOC();
+  if(!ref){S=JSON.parse(JSON.stringify(DEFAULTS));render();return;}
+  ref.onSnapshot(snap=>{
     setSyncOk(true);
-    S = snap.exists ? snap.data() : JSON.parse(JSON.stringify(DEFAULTS));
-    if (!snap.exists) save();
+    S=snap.exists?snap.data():JSON.parse(JSON.stringify(DEFAULTS));
+    if(!snap.exists)save();
     render();
-  }, () => {
-    setSyncOk(false);
-    S = JSON.parse(JSON.stringify(DEFAULTS));
-    render();
-  });
+  },()=>{setSyncOk(false);S=JSON.parse(JSON.stringify(DEFAULTS));render();});
 }
-function setSyncOk(ok) {
-  document.getElementById('sync-dot').classList.toggle('off', !ok);
-  document.getElementById('sync-text').textContent = ok ? 'מסונכרן' : 'לא מחובר';
+function setSyncOk(ok){
+  document.getElementById('sync-dot').classList.toggle('off',!ok);
+  document.getElementById('sync-text').textContent=ok?'מסונכרן':'לא מחובר';
 }
-function save() {
-  const ref = DOC();
-  if (ref) ref.set(S).catch(()=>{});
-}
+function save(){const ref=DOC();if(ref)ref.set(S).catch(()=>{});}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 
-// ── UID ───────────────────────────────────────────────────────────────────
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+// ── CATS SORTED ───────────────────────────────────────────────────────────
+function cats(){return[...S.categories].sort((a,b)=>a.order-b.order);}
+function itemsOf(catId){return S.items.filter(i=>i.catId===catId).sort((a,b)=>a.order-b.order);}
 
 // ── RENDER ────────────────────────────────────────────────────────────────
-function render() {
-  renderCats();
-  renderSidebar();
-  renderBottomBar();
+function render(){
+  const cs=cats();
+  if(!activeCat||!cs.find(c=>c.id===activeCat)) activeCat=cs[0]?.id||null;
+  renderNav(cs);
+  renderContent(cs);
   updateProgress();
 }
 
-function cats() { return [...S.categories].sort((a,b)=>a.order-b.order); }
-function itemsOf(catId) { return S.items.filter(i=>i.catId===catId).sort((a,b)=>a.order-b.order); }
-
-function renderCats() {
-  const con = document.getElementById('cats-container');
-  con.innerHTML = '';
-  cats().forEach(cat => {
-    const items = itemsOf(cat.id);
-    const packed = items.filter(i=>i.state==='packed').length;
-    const div = document.createElement('div');
-    div.className = 'cat-section';
-    div.id = 'cat-'+cat.id;
-    div.dataset.catId = cat.id;
-
-    const emptyHtml = items.length===0
-      ? `<div class="cat-empty" id="empty-${cat.id}">גרור פריט לכאן</div>`
-      : '';
-    const itemsHtml = items.map(it => itemHtml(it)).join('');
-
-    div.innerHTML = `
-      <div class="cat-header" onclick="toggleCat('${cat.id}')">
-        <span class="cat-icon">${cat.icon}</span>
-        <span class="cat-name">${esc(cat.name)}</span>
-        <span class="cat-stats">${packed}/${items.length}</span>
-        <button class="cat-del" onclick="event.stopPropagation();deleteCat('${cat.id}')">✕</button>
-        <span class="cat-chevron">▲</span>
-      </div>
-      <div class="items-list" id="list-${cat.id}">
-        ${emptyHtml}${itemsHtml}
-      </div>`;
-
-    con.appendChild(div);
-
-    // drag-over for the section
-    div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over-cat'); });
-    div.addEventListener('dragleave', e => { if(!div.contains(e.relatedTarget)) div.classList.remove('drag-over-cat'); });
-    div.addEventListener('drop', e => {
-      e.preventDefault(); div.classList.remove('drag-over-cat');
-      if (dragId && dragFromCat !== cat.id) moveItemToCat(dragId, cat.id);
-    });
-
-    // empty zone
-    const ez = div.querySelector('.cat-empty');
-    if (ez) {
-      ez.addEventListener('dragover', e => { e.preventDefault(); ez.classList.add('over'); });
-      ez.addEventListener('dragleave', () => ez.classList.remove('over'));
-      ez.addEventListener('drop', e => { e.preventDefault(); ez.classList.remove('over'); if(dragId) moveItemToCat(dragId,cat.id); });
-    }
-
-    // item rows
-    div.querySelectorAll('.item-row').forEach(attachDrag);
-  });
+function renderNav(cs){
+  const nav=document.getElementById('cat-nav');
+  nav.innerHTML=cs.map(c=>{
+    const items=itemsOf(c.id);
+    const packed=items.filter(i=>i.state==='packed').length;
+    return`<div class="cat-tab${c.id===activeCat?' active':''}" 
+      data-cat="${c.id}"
+      onclick="switchCat('${c.id}')"
+      ondragover="event.preventDefault();this.classList.add('drop-target')"
+      ondragleave="this.classList.remove('drop-target')"
+      ondrop="onTabDrop(event,'${c.id}')">
+      <span class="tab-icon">${c.icon}</span>
+      <span class="tab-count">${packed}/${items.length}</span>
+    </div>`;
+  }).join('');
+  // scroll active tab into view
+  const activeTab=nav.querySelector('.cat-tab.active');
+  if(activeTab) activeTab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
 }
 
-function itemHtml(it) {
-  return `<div class="item-row" data-id="${it.id}" data-state="${it.state}" draggable="true">
-    <span class="drag-handle">⠿</span>
+function renderContent(cs){
+  const con=document.getElementById('cats-container');
+  con.innerHTML=cs.map(cat=>{
+    const items=itemsOf(cat.id);
+    const packed=items.filter(i=>i.state==='packed').length;
+    return`<div class="cat-section${cat.id===activeCat?' visible':''}" id="cat-${cat.id}">
+      <div class="cat-section-header">
+        <span class="csh-icon">${cat.icon}</span>
+        <span class="csh-name">${esc(cat.name)}</span>
+        <span class="csh-stats">${packed}/${items.length}</span>
+        <button class="btn-sm" style="font-size:12px;padding:5px 10px;background:var(--terracotta)" onclick="deleteCat('${cat.id}')">✕</button>
+      </div>
+      <div class="items-list" id="list-${cat.id}">
+        ${items.length===0?'<div style="padding:16px 14px;font-size:14px;color:var(--text-light);text-align:center;">אין פריטים — הוסף למטה</div>':items.map(it=>itemHtml(it)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function itemHtml(it){
+  return`<div class="item-row" data-id="${it.id}" data-state="${it.state}" draggable="true"
+    ondragstart="onItemDragStart(event,'${it.id}')"
+    ondragend="onItemDragEnd(event)"
+    ondragover="event.preventDefault()"
+    ondrop="onItemDrop(event,'${it.id}')">
     <div class="item-check" onclick="toggle('${it.id}')">
       <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
         <path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -559,177 +490,141 @@ function itemHtml(it) {
     </div>
     <span class="item-label" contenteditable="true"
       onblur="updateText('${it.id}',this)"
-      onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
-      >${esc(it.text)}</span>
+      onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      ${esc(it.text)}</span>
+    <button class="item-move-btn" onclick="openMoveModal('${it.id}')" title="העבר לקטגוריה">⇄</button>
     <button class="item-del" onclick="deleteItem('${it.id}')">✕</button>
   </div>`;
 }
 
-function renderSidebar() {
-  const nav = document.getElementById('sidebar-nav');
-  nav.innerHTML = cats().map(cat => {
-    const items = itemsOf(cat.id);
-    const packed = items.filter(i=>i.state==='packed').length;
-    return `
-      <a class="sidebar-link" href="#cat-${cat.id}">
-        <span class="si-icon">${cat.icon}</span>
-        <span class="si-name">${esc(cat.name)}</span>
-        <span class="si-count">${packed}/${items.length}</span>
-      </a>
-      <div class="sidebar-dropzone" data-cat="${cat.id}">⬇ שחרר כאן</div>`;
-  }).join('');
-
-  nav.querySelectorAll('.sidebar-dropzone').forEach(dz => {
-    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
-    dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); if(dragId) moveItemToCat(dragId, dz.dataset.cat); });
-  });
+function updateProgress(){
+  const total=S.items.length;
+  const packed=S.items.filter(i=>i.state==='packed').length;
+  const pct=total?Math.round(packed/total*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-total').textContent=packed+'/'+total+' פריטים';
 }
 
-function renderBottomBar() {
-  const sel = document.getElementById('bar-cat-sel');
-  const prev = sel.value;
-  sel.innerHTML = cats().map(c => `<option value="${c.id}">${c.icon} ${esc(c.name)}</option>`).join('');
-  if (prev && [...sel.options].some(o=>o.value===prev)) sel.value = prev;
+// ── NAV ───────────────────────────────────────────────────────────────────
+function switchCat(id){
+  activeCat=id;
+  render();
 }
 
-function updateProgress() {
-  const total = S.items.length;
-  const packed = S.items.filter(i=>i.state==='packed').length;
-  const pct = total ? Math.round(packed/total*100) : 0;
-  document.getElementById('prog-fill').style.width = pct+'%';
-  document.getElementById('prog-pct').textContent = pct+'%';
-  document.getElementById('prog-total').textContent = packed + '/' + total + ' פריטים';
+// ── DRAG BETWEEN CATEGORIES (desktop) ─────────────────────────────────────
+let dragItemId=null, dragSrcCat=null;
+function onItemDragStart(e,id){
+  dragItemId=id;
+  dragSrcCat=S.items.find(i=>i.id===id)?.catId;
+  e.dataTransfer.effectAllowed='move';
+  setTimeout(()=>e.target.classList.add('lp-dragging'),0);
+}
+function onItemDragEnd(e){
+  e.target.classList.remove('lp-dragging');
+  document.querySelectorAll('.drop-target').forEach(el=>el.classList.remove('drop-target'));
+  dragItemId=null; dragSrcCat=null;
+}
+function onTabDrop(e,catId){
+  e.preventDefault();
+  document.querySelectorAll('.drop-target').forEach(el=>el.classList.remove('drop-target'));
+  if(dragItemId) moveItemToCat(dragItemId,catId);
+}
+function onItemDrop(e,targetId){
+  e.preventDefault();
+  if(!dragItemId||dragItemId===targetId) return;
+  const src=S.items.find(i=>i.id===dragItemId);
+  const tgt=S.items.find(i=>i.id===targetId);
+  if(!src||!tgt||src.catId!==tgt.catId) return;
+  const tmp=src.order; src.order=tgt.order; tgt.order=tmp;
+  save(); render();
 }
 
-// ── DRAG & DROP ───────────────────────────────────────────────────────────
-function attachDrag(row) {
-  row.addEventListener('dragstart', e => {
-    dragId = row.dataset.id;
-    dragFromCat = row.closest('.cat-section').dataset.catId;
-    row.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    // show sidebar dropzones
-    document.querySelectorAll('.sidebar-dropzone').forEach(dz=>dz.classList.add('vis'));
-  });
-  row.addEventListener('dragend', () => {
-    row.classList.remove('dragging');
-    document.querySelectorAll('.drop-above').forEach(r=>r.classList.remove('drop-above'));
-    document.querySelectorAll('.sidebar-dropzone').forEach(dz=>{ dz.classList.remove('vis','over'); });
-    dragId=null; dragFromCat=null;
-  });
-  row.addEventListener('dragover', e => {
-    e.preventDefault();
-    document.querySelectorAll('.drop-above').forEach(r=>r.classList.remove('drop-above'));
-    row.classList.add('drop-above');
-  });
-  row.addEventListener('drop', e => {
-    e.preventDefault();
-    if (!dragId || dragId===row.dataset.id) return;
-    const src = S.items.find(i=>i.id===dragId);
-    const tgt = S.items.find(i=>i.id===row.dataset.id);
-    if (!src||!tgt||src.catId!==tgt.catId) return;
-    const tmp=src.order; src.order=tgt.order; tgt.order=tmp;
-    save(); render();
-  });
+// ── MOVE MODAL (mobile-friendly move between categories) ──────────────────
+function openMoveModal(itemId){
+  movingItemId=itemId;
+  const item=S.items.find(i=>i.id===itemId);
+  const modal=document.getElementById('move-modal');
+  const con=document.getElementById('move-modal-cats');
+  con.innerHTML=cats()
+    .filter(c=>c.id!==item.catId)
+    .map(c=>`<button class="move-cat-btn" onclick="moveItemToCat('${itemId}','${c.id}');closeMoveModal()">
+      <span style="font-size:20px">${c.icon}</span> ${esc(c.name)}
+    </button>`).join('');
+  modal.classList.add('open');
+}
+function closeMoveModal(){
+  document.getElementById('move-modal').classList.remove('open');
+  movingItemId=null;
 }
 
 // ── ACTIONS ───────────────────────────────────────────────────────────────
-function toggle(id) {
-  const it = S.items.find(i=>i.id===id);
-  if (!it) return;
-  it.state = it.state==='packed' ? 'grey' : 'packed';
+function toggle(id){
+  const it=S.items.find(i=>i.id===id);
+  if(!it) return;
+  it.state=it.state==='packed'?'grey':'packed';
   save(); render();
 }
-
-function updateText(id, el) {
-  const t = el.textContent.trim();
-  const it = S.items.find(i=>i.id===id);
-  if (!it) return;
-  if (!t) { deleteItem(id); return; }
-  if (it.text !== t) { it.text=t; save(); }
+function updateText(id,el){
+  const t=el.textContent.trim();
+  const it=S.items.find(i=>i.id===id);
+  if(!it) return;
+  if(!t){deleteItem(id);return;}
+  if(it.text!==t){it.text=t;save();}
 }
-
-function deleteItem(id) {
-  S.items = S.items.filter(i=>i.id!==id);
+function deleteItem(id){
+  S.items=S.items.filter(i=>i.id!==id);
   save(); render();
 }
-
-function moveItemToCat(id, catId) {
-  const it = S.items.find(i=>i.id===id);
-  if (!it||it.catId===catId) return;
+function moveItemToCat(id,catId){
+  const it=S.items.find(i=>i.id===id);
+  if(!it||it.catId===catId) return;
   it.catId=catId;
-  const others = S.items.filter(i=>i.catId===catId&&i.id!==id);
-  it.order = others.length ? Math.max(...others.map(i=>i.order))+1 : 0;
+  const others=S.items.filter(i=>i.catId===catId&&i.id!==id);
+  it.order=others.length?Math.max(...others.map(i=>i.order))+1:0;
+  activeCat=catId;
   save(); render();
 }
-
-function addItemFromBar() {
-  const inp = document.getElementById('bar-item-inp');
-  const text = inp.value.trim();
-  const catId = document.getElementById('bar-cat-sel').value;
-  if (!text||!catId) return;
-  const others = S.items.filter(i=>i.catId===catId);
-  const maxOrd = others.length ? Math.max(...others.map(i=>i.order)) : -1;
-  S.items.push({id:uid(),catId,text,state:'grey',order:maxOrd+1});
+function addItemFromBar(){
+  const inp=document.getElementById('bar-inp');
+  const text=inp.value.trim();
+  if(!text||!activeCat) return;
+  const others=S.items.filter(i=>i.catId===activeCat);
+  const maxOrd=others.length?Math.max(...others.map(i=>i.order)):-1;
+  S.items.push({id:uid(),catId:activeCat,text,state:'grey',order:maxOrd+1});
   inp.value='';
   save(); render();
-  // scroll to the category
-  const el = document.getElementById('cat-'+catId);
-  if (el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-
-function addCat() {
-  const inp = document.getElementById('new-cat-inp');
-  const name = inp.value.trim();
-  if (!name) return;
+function addCat(){
+  const inp=document.getElementById('new-cat-inp');
+  const name=inp.value.trim();
+  if(!name) return;
   const ICONS=['📋','🧳','🎒','👜','👗','💊','📸','🔌','🏖','🎿','🍫','🧴'];
-  const maxOrd = S.categories.length ? Math.max(...S.categories.map(c=>c.order)) : -1;
+  const maxOrd=S.categories.length?Math.max(...S.categories.map(c=>c.order)):-1;
   S.categories.push({id:uid(),name,icon:ICONS[S.categories.length%ICONS.length],order:maxOrd+1});
   inp.value='';
   save(); render();
 }
-
-function deleteCat(id) {
-  if (!confirm('למחוק קטגוריה וכל הפריטים שלה?')) return;
-  S.categories = S.categories.filter(c=>c.id!==id);
-  S.items = S.items.filter(i=>i.catId!==id);
+function deleteCat(id){
+  if(!confirm('למחוק קטגוריה וכל הפריטים שלה?')) return;
+  S.categories=S.categories.filter(c=>c.id!==id);
+  S.items=S.items.filter(i=>i.catId!==id);
   save(); render();
 }
-
-function toggleCat(id) {
-  document.getElementById('cat-'+id)?.classList.toggle('collapsed');
+function toggleFilter(){
+  filterOn=!filterOn;
+  document.body.classList.toggle('filter-unpacked',filterOn);
+  const btn=document.getElementById('filter-btn');
+  btn.textContent=filterOn?'👁 הכל':'👁 חסרים';
+  btn.classList.toggle('on',filterOn);
 }
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-function toggleFilter() {
-  filterOn = !filterOn;
-  document.body.classList.toggle('filter-unpacked', filterOn);
-  const btn = document.getElementById('filter-btn');
-  btn.textContent = filterOn ? '👁 הצג הכל' : '👁 הצג חסרים';
-  btn.className = filterOn ? 'btn btn-active' : 'btn btn-outline';
-}
+// ── ITEM MOVE BUTTON STYLE ─────────────────────────────────────────────────
+const style=document.createElement('style');
+style.textContent='.item-move-btn{background:none;border:1.5px solid var(--border);border-radius:7px;color:var(--text-light);font-size:15px;cursor:pointer;padding:3px 7px;flex-shrink:0;transition:all .15s;min-width:30px;min-height:30px;display:flex;align-items:center;justify-content:center;}.item-move-btn:active{background:var(--teal-pale);color:var(--teal);border-color:var(--teal);}';
+document.head.appendChild(style);
 
-function resetAll() {
-  if (!confirm('לאפס את כל הסימונים?')) return;
-  S.items.forEach(i=>i.state='grey');
-  save(); render();
-}
-
-function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ── SCROLL SPY ────────────────────────────────────────────────────────────
-window.addEventListener('scroll', ()=>{
-  let cur=null;
-  cats().forEach(c=>{
-    const el=document.getElementById('cat-'+c.id);
-    if(el&&el.getBoundingClientRect().top<=100) cur=c.id;
-  });
-  document.querySelectorAll('.sidebar-link').forEach(a=>{
-    a.classList.toggle('active', a.getAttribute('href')==='#cat-'+cur);
-  });
-},{passive:true});
-
-// ── INIT ──────────────────────────────────────────────────────────────────
 initSync();
 </script>
 </body>
