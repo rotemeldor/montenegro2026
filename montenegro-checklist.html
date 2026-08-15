@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Montenegro 2026 — אריזה</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F3EE;
+  --surface: #FDFCFA;
+  --border: #E2DDD5;
+  --teal: #2A6B6B;
+  --teal-light: #3D8F8F;
+  --teal-pale: #E8F2F2;
+  --terracotta: #C4603A;
+  --sand: #A08060;
+  --charcoal: #2C2825;
+  --text: #1A1210;
+  --text-muted: #6B5040;
+  --text-light: #9A8878;
+  --green: #2E7D4F;
+  --green-bg: #EAF5EE;
+  --grey-col: #B0A898;
+  --sidebar-w: 200px;
+  --header-h: 54px;
+  --bar-h: 56px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.header {
+  position: fixed; top:0; left:0; right:0; z-index:300;
+  height: var(--header-h);
+  background: var(--charcoal);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+}
+.header-title {
+  font-size: 16px; font-weight: 700; color: white; flex:1;
+}
+.header-title span { color: #A8D5D5; font-weight: 300; font-size: 13px; }
+.sync-badge {
+  font-size: 11px; color: rgba(255,255,255,.55);
+  display: flex; align-items: center; gap: 4px; white-space: nowrap;
+}
+.sync-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #4CAF50;
+  animation: pulse 2s infinite; flex-shrink:0;
+}
+.sync-dot.off { background: #E57373; animation: none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* ── BOTTOM ACTION BAR ── */
+.bottom-bar {
+  position: fixed; bottom:0; left:0; right:0; z-index:300;
+  height: var(--bar-h);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+}
+.bottom-bar input {
+  flex:1; font-family:'Heebo',sans-serif; font-size:15px;
+  padding: 8px 12px; border: 1.5px solid var(--border);
+  border-radius: 10px; background: var(--bg); color: var(--text);
+  outline:none; text-align:right; min-width:0;
+}
+.bottom-bar input:focus { border-color: var(--teal); }
+.bottom-bar input::placeholder { color: var(--text-light); }
+.bottom-bar select {
+  font-family:'Heebo',sans-serif; font-size:13px;
+  padding: 8px 8px; border: 1.5px solid var(--border);
+  border-radius: 10px; background: var(--bg); color: var(--text-muted);
+  outline:none; max-width: 100px; flex-shrink:0;
+}
+.btn-add {
+  font-family:'Heebo',sans-serif; font-size:15px; font-weight:700;
+  width: 42px; height: 42px; border-radius: 50%; border:none;
+  background: var(--teal); color: white; cursor:pointer; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 2px 8px rgba(42,107,107,.4);
+  transition: background .15s, transform .1s;
+}
+.btn-add:active { background: var(--teal-light); transform: scale(.95); }
+
+/* ── LAYOUT ── */
+.layout {
+  display: flex;
+  padding-top: var(--header-h);
+  padding-bottom: calc(var(--bar-h) + 8px);
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed;
+  top: var(--header-h); bottom: var(--bar-h);
+  right: 0; width: var(--sidebar-w);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  overflow-y: auto; overflow-x: hidden;
+  z-index:200;
+  -webkit-overflow-scrolling: touch;
+}
+.sidebar-label {
+  font-size: 10px; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color: var(--text-light);
+  padding: 14px 14px 8px; display:block;
+}
+.sidebar-link {
+  display:flex; align-items:center; gap:6px;
+  padding: 10px 14px; cursor:pointer;
+  font-size: 13px; font-weight:500; color: var(--text-muted);
+  border-right: 3px solid transparent;
+  transition: all .15s; text-decoration:none;
+  -webkit-user-select:none; user-select:none;
+}
+.sidebar-link:hover, .sidebar-link:active { background: var(--teal-pale); color: var(--teal); }
+.sidebar-link.active { border-right-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
+.sidebar-link .si-icon { font-size:15px; flex-shrink:0; }
+.sidebar-link .si-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.si-count {
+  font-size:10px; font-weight:700;
+  background: var(--border); color: var(--text-light);
+  padding: 1px 5px; border-radius:8px; flex-shrink:0;
+}
+.sidebar-dropzone {
+  margin: 2px 8px; padding: 7px 8px;
+  border: 2px dashed transparent; border-radius:8px;
+  font-size:11px; color: var(--text-light); text-align:center;
+  display:none; transition: all .2s;
+}
+.sidebar-dropzone.vis { display:block; }
+.sidebar-dropzone.over { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
+
+/* ── MAIN ── */
+.main {
+  flex:1; margin-right: var(--sidebar-w);
+  padding: 16px 14px 16px 10px;
+  min-width:0;
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center;
+}
+.progress-wrap {
+  flex:1; display:flex; align-items:center; gap:10px; min-width:160px;
+}
+.progress-track { flex:1; height:7px; background: var(--border); border-radius:4px; overflow:hidden; }
+.progress-fill { height:100%; background: var(--green); border-radius:4px; transition: width .4s ease; }
+.progress-pct { font-size:13px; font-weight:700; color: var(--green); white-space:nowrap; min-width:32px; }
+.btn {
+  font-family:'Heebo',sans-serif; font-size:13px; font-weight:600;
+  padding: 7px 14px; border-radius:9px; border:none; cursor:pointer;
+  transition: all .15s; white-space:nowrap;
+  -webkit-user-select:none; user-select:none;
+}
+.btn:active { transform: scale(.96); }
+.btn-teal { background: var(--teal); color:white; }
+.btn-teal:hover { background: var(--teal-light); }
+.btn-outline { background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+.btn-active { background: var(--teal-pale); color: var(--teal); border: 1.5px solid var(--teal-light); }
+
+/* ── ADD CATEGORY ── */
+.add-cat-row {
+  display:flex; gap:8px; margin-bottom:14px;
+}
+.add-cat-input {
+  flex:1; font-family:'Heebo',sans-serif; font-size:14px;
+  padding: 8px 12px; border: 1.5px solid var(--border);
+  border-radius:10px; background: var(--surface); color: var(--text);
+  outline:none; text-align:right; min-width:0;
+}
+.add-cat-input:focus { border-color: var(--teal); }
+.add-cat-input::placeholder { color: var(--text-light); }
+
+/* ── CAT SECTION ── */
+.cat-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  margin-bottom: 12px;
+  overflow:hidden;
+  transition: box-shadow .2s, border-color .2s;
+}
+.cat-section.drag-over-cat { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal-pale); }
+
+.cat-header {
+  display:flex; align-items:center; gap:8px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  cursor:pointer; -webkit-user-select:none; user-select:none;
+  min-height: 48px;
+}
+.cat-icon { font-size:18px; flex-shrink:0; }
+.cat-name { font-size:16px; font-weight:700; color: var(--charcoal); flex:1; }
+.cat-stats { font-size:12px; color: var(--text-light); flex-shrink:0; }
+.cat-del { 
+  background:none; border:none; color: var(--text-light); font-size:16px;
+  cursor:pointer; padding:4px 6px; border-radius:6px; flex-shrink:0;
+  opacity:.5; transition: opacity .15s;
+}
+.cat-del:active { opacity:1; color: var(--terracotta); }
+.cat-chevron { font-size:11px; color: var(--text-light); flex-shrink:0; transition: transform .2s; }
+.cat-section.collapsed .cat-chevron { transform: rotate(180deg); }
+.cat-section.collapsed .items-list,
+.cat-section.collapsed .cat-empty { display:none; }
+
+/* ── ITEMS ── */
+.items-list { padding: 4px 0; min-height:10px; }
+
+.cat-empty {
+  padding: 12px 14px;
+  text-align:center; font-size:13px; color: var(--text-light);
+  border: 2px dashed transparent; margin: 6px 10px;
+  border-radius:8px; transition: all .2s;
+}
+.cat-empty.over { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
+
+.item-row {
+  display:flex; align-items:center; gap:10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(226,221,213,.5);
+  transition: background .12s;
+  position:relative; min-height: 48px;
+}
+.item-row:last-child { border-bottom:none; }
+.item-row.dragging { opacity:.35; }
+.item-row.drop-above { border-top: 2.5px solid var(--teal); }
+
+/* drag handle — hidden on mobile, visible on desktop */
+.drag-handle {
+  color: var(--text-light); font-size:16px;
+  cursor:grab; opacity:.4; flex-shrink:0;
+  touch-action: none;
+  padding: 4px 2px;
+}
+.item-row:hover .drag-handle { opacity:.8; }
+@media(hover:none) { .drag-handle { opacity:.3; } }
+
+/* CHECKBOX — large touch target */
+.item-check {
+  width:26px; height:26px; border-radius:7px;
+  border: 2px solid var(--border);
+  flex-shrink:0; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition: all .18s; background:white;
+  min-width:26px; min-height:26px;
+}
+.item-check svg { display:none; }
+
+.item-row[data-state="packed"] .item-check {
+  background: var(--green); border-color: var(--green);
+}
+.item-row[data-state="packed"] .item-check svg { display:block; }
+.item-row[data-state="packed"] .item-label {
+  color: var(--green);
+  text-decoration: line-through;
+  text-decoration-color: rgba(46,125,79,.4);
+}
+.item-row[data-state="grey"] .item-label { color: var(--grey-col); }
+.item-row[data-state="grey"] .item-check { border-color: #DDD; opacity:.65; }
+
+.item-label {
+  flex:1; font-size:15px; color: var(--text);
+  transition: color .18s; min-width:0;
+  word-break: break-word;
+  outline:none; cursor:text;
+  -webkit-user-select:text; user-select:text;
+}
+.item-label:empty::before { content:attr(data-placeholder); color:var(--text-light); }
+
+.item-del {
+  background:none; border:none; color: var(--text-light);
+  font-size:18px; cursor:pointer; padding:4px 6px;
+  border-radius:6px; flex-shrink:0; opacity:.35;
+  transition: opacity .15s; min-width:32px; min-height:32px;
+  display:flex; align-items:center; justify-content:center;
+}
+.item-row:hover .item-del { opacity:.6; }
+.item-del:active { opacity:1; color: var(--terracotta); }
+
+/* ── FILTER (show only unpacked) ── */
+body.filter-unpacked .item-row[data-state="packed"] { display:none; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius:4px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-title">Montenegro 2026 <span>— אריזה</span></div>
+  <div class="sync-badge">
+    <span id="sync-text">...</span>
+    <span class="sync-dot off" id="sync-dot"></span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <span class="sidebar-label">קטגוריות</span>
+    <div id="sidebar-nav"></div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+        <span class="progress-pct" id="prog-pct">0%</span>
+      </div>
+      <button class="btn btn-outline" id="filter-btn" onclick="toggleFilter()">👁 הצג חסרים</button>
+      <button class="btn btn-outline" onclick="resetAll()">אפס</button>
+    </div>
+
+    <!-- ADD CATEGORY -->
+    <div class="add-cat-row">
+      <input class="add-cat-input" id="new-cat-inp" placeholder="קטגוריה חדשה..."
+        onkeydown="if(event.key==='Enter')addCat()">
+      <button class="btn btn-teal" onclick="addCat()">+ קטגוריה</button>
+    </div>
+
+    <div id="cats-container"></div>
+  </main>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <select id="bar-cat-sel"></select>
+  <input id="bar-item-inp" type="text" placeholder="פריט חדש..."
+    onkeydown="if(event.key==='Enter')addItemFromBar()">
+  <button class="btn-add" onclick="addItemFromBar()">+</button>
+</div>
+
+<script>
+// ── FIREBASE ──────────────────────────────────────────────────────────────
+const FB = {
+  apiKey:"AIzaSyBiaqQ20D9DmYKu0ShvY8qwGR9HWjMvLxg",
+  authDomain:"asl-bets.firebaseapp.com",
+  projectId:"asl-bets",
+  storageBucket:"asl-bets.firebasestorage.app",
+  messagingSenderId:"308373695574",
+  appId:"1:308373695574:web:7a46493636c25a51971ff7"
+};
+let db=null;
+try{ firebase.initializeApp(FB); db=firebase.firestore(); }catch(e){}
+const DOC = ()=> db ? db.collection('montenegro_checklist').doc('packing') : null;
+
+// ── DEFAULTS ──────────────────────────────────────────────────────────────
+const DEFAULTS = {
+  categories:[
+    {id:'c1',name:'כללי',icon:'📋',order:0},
+    {id:'c2',name:'מזוודה גדולה',icon:'🧳',order:1},
+    {id:'c3',name:'טרולי',icon:'🎒',order:2},
+    {id:'c4',name:'תיק קטן',icon:'👜',order:3},
+    {id:'c5',name:'שושה',icon:'👶',order:4},
+    {id:'c6',name:'דברים חשובים',icon:'📄',order:5},
+  ],
+  items:[
+    // כללי
+    {id:'i1', catId:'c1',text:'דרכונים (x3)',state:'grey',order:0},
+    {id:'i2', catId:'c1',text:'כרטיסי טיסה מודפסים',state:'grey',order:1},
+    {id:'i3', catId:'c1',text:'ביטוח נסיעות',state:'grey',order:2},
+    {id:'i4', catId:'c1',text:'יורו מזומן',state:'grey',order:3},
+    {id:'i5', catId:'c1',text:'כרטיסי אשראי',state:'grey',order:4},
+    {id:'i6', catId:'c1',text:'הזמנות מלון מודפסות',state:'grey',order:5},
+    {id:'i7', catId:'c1',text:'ניווט אופליין (Maps.me / Waze)',state:'grey',order:6},
+    {id:'i8', catId:'c1',text:'מטען לרכב / מפצל USB',state:'grey',order:7},
+    {id:'i9', catId:'c1',text:'קרם הגנה SPF50',state:'grey',order:8},
+    {id:'i10',catId:'c1',text:'מוצרי חיטוי / מגבוני לחים',state:'grey',order:9},
+    // מזוודה גדולה
+    {id:'i20',catId:'c2',text:'חולצות (8)',state:'grey',order:0},
+    {id:'i21',catId:'c2',text:'מכנסיים / שורטים (4)',state:'grey',order:1},
+    {id:'i22',catId:'c2',text:'בגדי שכבות לקור (צפון)',state:'grey',order:2},
+    {id:'i23',catId:'c2',text:'ז\'קט / מעיל קל',state:'grey',order:3},
+    {id:'i24',catId:'c2',text:'בגד ים (x2)',state:'grey',order:4},
+    {id:'i25',catId:'c2',text:'נעלי הרים / טיול',state:'grey',order:5},
+    {id:'i26',catId:'c2',text:'כפכפים / נעלי ים',state:'grey',order:6},
+    {id:'i27',catId:'c2',text:'נעלי ערב',state:'grey',order:7},
+    {id:'i28',catId:'c2',text:'פיג\'מות',state:'grey',order:8},
+    {id:'i29',catId:'c2',text:'לבנים / גרביים (x8)',state:'grey',order:9},
+    {id:'i30',catId:'c2',text:'שמפו + מרכך',state:'grey',order:10},
+    {id:'i31',catId:'c2',text:'סבון גוף',state:'grey',order:11},
+    {id:'i32',catId:'c2',text:'דאודורנט',state:'grey',order:12},
+    {id:'i33',catId:'c2',text:'מברשת שיניים + משחה',state:'grey',order:13},
+    {id:'i34',catId:'c2',text:'מכונת גילוח',state:'grey',order:14},
+    {id:'i35',catId:'c2',text:'מייבש שיער',state:'grey',order:15},
+    {id:'i36',catId:'c2',text:'מגבות חוף',state:'grey',order:16},
+    // טרולי
+    {id:'i40',catId:'c3',text:'מחשב נייד',state:'grey',order:0},
+    {id:'i41',catId:'c3',text:'אוזניות',state:'grey',order:1},
+    {id:'i42',catId:'c3',text:'מטען נייד (power bank)',state:'grey',order:2},
+    {id:'i43',catId:'c3',text:'כבל USB-C',state:'grey',order:3},
+    {id:'i44',catId:'c3',text:'מתאם חשמל אירופי',state:'grey',order:4},
+    {id:'i45',catId:'c3',text:'ספר / קינדל',state:'grey',order:5},
+    {id:'i46',catId:'c3',text:'חטיפים לדרך',state:'grey',order:6},
+    {id:'i47',catId:'c3',text:'בקבוק מים',state:'grey',order:7},
+    // תיק קטן
+    {id:'i50',catId:'c4',text:'ארנק',state:'grey',order:0},
+    {id:'i51',catId:'c4',text:'טלפון + כבל',state:'grey',order:1},
+    {id:'i52',catId:'c4',text:'מפתחות בית',state:'grey',order:2},
+    {id:'i53',catId:'c4',text:'משקפי שמש',state:'grey',order:3},
+    {id:'i54',catId:'c4',text:'משקפיים / עדשות',state:'grey',order:4},
+    {id:'i55',catId:'c4',text:'מסכה + אטמי אוזניים לטיסה',state:'grey',order:5},
+    {id:'i56',catId:'c4',text:'ממתקים לאוזניים (לטיסה)',state:'grey',order:6},
+    // שושה
+    {id:'i60',catId:'c5',text:'בגדים (7 ימים)',state:'grey',order:0},
+    {id:'i61',catId:'c5',text:'פיג\'מות (x2)',state:'grey',order:1},
+    {id:'i62',catId:'c5',text:'נעליים נוחות',state:'grey',order:2},
+    {id:'i63',catId:'c5',text:'כפכפים',state:'grey',order:3},
+    {id:'i64',catId:'c5',text:'בגד ים',state:'grey',order:4},
+    {id:'i65',catId:'c5',text:'כובע שמש',state:'grey',order:5},
+    {id:'i66',catId:'c5',text:'קרם הגנה לילדים',state:'grey',order:6},
+    {id:'i67',catId:'c5',text:'צעצועים / ספרים לדרך',state:'grey',order:7},
+    {id:'i68',catId:'c5',text:'טאבלט + אוזניות לילדים',state:'grey',order:8},
+    {id:'i69',catId:'c5',text:'חטיפים מועדפים',state:'grey',order:9},
+    {id:'i70',catId:'c5',text:'ג\'קט קל לצפון (קר בלילה)',state:'grey',order:10},
+    {id:'i71',catId:'c5',text:'מוצץ / פריט שינה מוכר',state:'grey',order:11},
+    {id:'i72',catId:'c5',text:'חיתולים + מגבוני לחים',state:'grey',order:12},
+    {id:'i73',catId:'c5',text:'קרם החתלה',state:'grey',order:13},
+    {id:'i74',catId:'c5',text:'כסא בטיחות / booster',state:'grey',order:14},
+    // דברים חשובים
+    {id:'i80',catId:'c6',text:'תרופות קבועות',state:'grey',order:0},
+    {id:'i81',catId:'c6',text:'אקמול / נורופן ילדים',state:'grey',order:1},
+    {id:'i82',catId:'c6',text:'אנטיביוטיקה רזרבה',state:'grey',order:2},
+    {id:'i83',catId:'c6',text:'פלסטרים + חומר חיטוי',state:'grey',order:3},
+    {id:'i84',catId:'c6',text:'תרופה נגד בחילה (נסיעה)',state:'grey',order:4},
+    {id:'i85',catId:'c6',text:'מסמכי ביטוח מודפסים',state:'grey',order:5},
+    {id:'i86',catId:'c6',text:'ז\'קט עבה ללינה הגובה (Žabljak)',state:'grey',order:6},
+  ]
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let S = {categories:[], items:[]};
+let filterOn = false;
+let dragId = null, dragFromCat = null;
+
+// ── FIREBASE SYNC ─────────────────────────────────────────────────────────
+function initSync() {
+  const ref = DOC();
+  if (!ref) { S = JSON.parse(JSON.stringify(DEFAULTS)); render(); return; }
+  ref.onSnapshot(snap => {
+    setSyncOk(true);
+    S = snap.exists ? snap.data() : JSON.parse(JSON.stringify(DEFAULTS));
+    if (!snap.exists) save();
+    render();
+  }, () => {
+    setSyncOk(false);
+    S = JSON.parse(JSON.stringify(DEFAULTS));
+    render();
+  });
+}
+function setSyncOk(ok) {
+  document.getElementById('sync-dot').classList.toggle('off', !ok);
+  document.getElementById('sync-text').textContent = ok ? 'מסונכרן' : 'לא מחובר';
+}
+function save() {
+  const ref = DOC();
+  if (ref) ref.set(S).catch(()=>{});
+}
+
+// ── UID ───────────────────────────────────────────────────────────────────
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function render() {
+  renderCats();
+  renderSidebar();
+  renderBottomBar();
+  updateProgress();
+}
+
+function cats() { return [...S.categories].sort((a,b)=>a.order-b.order); }
+function itemsOf(catId) { return S.items.filter(i=>i.catId===catId).sort((a,b)=>a.order-b.order); }
+
+function renderCats() {
+  const con = document.getElementById('cats-container');
+  con.innerHTML = '';
+  cats().forEach(cat => {
+    const items = itemsOf(cat.id);
+    const packed = items.filter(i=>i.state==='packed').length;
+    const div = document.createElement('div');
+    div.className = 'cat-section';
+    div.id = 'cat-'+cat.id;
+    div.dataset.catId = cat.id;
+
+    const emptyHtml = items.length===0
+      ? `<div class="cat-empty" id="empty-${cat.id}">גרור פריט לכאן</div>`
+      : '';
+    const itemsHtml = items.map(it => itemHtml(it)).join('');
+
+    div.innerHTML = `
+      <div class="cat-header" onclick="toggleCat('${cat.id}')">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-name">${esc(cat.name)}</span>
+        <span class="cat-stats">${packed}/${items.length}</span>
+        <button class="cat-del" onclick="event.stopPropagation();deleteCat('${cat.id}')">✕</button>
+        <span class="cat-chevron">▲</span>
+      </div>
+      <div class="items-list" id="list-${cat.id}">
+        ${emptyHtml}${itemsHtml}
+      </div>`;
+
+    con.appendChild(div);
+
+    // drag-over for the section
+    div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over-cat'); });
+    div.addEventListener('dragleave', e => { if(!div.contains(e.relatedTarget)) div.classList.remove('drag-over-cat'); });
+    div.addEventListener('drop', e => {
+      e.preventDefault(); div.classList.remove('drag-over-cat');
+      if (dragId && dragFromCat !== cat.id) moveItemToCat(dragId, cat.id);
+    });
+
+    // empty zone
+    const ez = div.querySelector('.cat-empty');
+    if (ez) {
+      ez.addEventListener('dragover', e => { e.preventDefault(); ez.classList.add('over'); });
+      ez.addEventListener('dragleave', () => ez.classList.remove('over'));
+      ez.addEventListener('drop', e => { e.preventDefault(); ez.classList.remove('over'); if(dragId) moveItemToCat(dragId,cat.id); });
+    }
+
+    // item rows
+    div.querySelectorAll('.item-row').forEach(attachDrag);
+  });
+}
+
+function itemHtml(it) {
+  return `<div class="item-row" data-id="${it.id}" data-state="${it.state}" draggable="true">
+    <span class="drag-handle">⠿</span>
+    <div class="item-check" onclick="toggle('${it.id}')">
+      <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+        <path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span class="item-label" contenteditable="true"
+      onblur="updateText('${it.id}',this)"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+      >${esc(it.text)}</span>
+    <button class="item-del" onclick="deleteItem('${it.id}')">✕</button>
+  </div>`;
+}
+
+function renderSidebar() {
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = cats().map(cat => {
+    const items = itemsOf(cat.id);
+    const packed = items.filter(i=>i.state==='packed').length;
+    return `
+      <a class="sidebar-link" href="#cat-${cat.id}">
+        <span class="si-icon">${cat.icon}</span>
+        <span class="si-name">${esc(cat.name)}</span>
+        <span class="si-count">${packed}/${items.length}</span>
+      </a>
+      <div class="sidebar-dropzone" data-cat="${cat.id}">⬇ שחרר כאן</div>`;
+  }).join('');
+
+  nav.querySelectorAll('.sidebar-dropzone').forEach(dz => {
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); if(dragId) moveItemToCat(dragId, dz.dataset.cat); });
+  });
+}
+
+function renderBottomBar() {
+  const sel = document.getElementById('bar-cat-sel');
+  const prev = sel.value;
+  sel.innerHTML = cats().map(c => `<option value="${c.id}">${c.icon} ${esc(c.name)}</option>`).join('');
+  if (prev && [...sel.options].some(o=>o.value===prev)) sel.value = prev;
+}
+
+function updateProgress() {
+  const total = S.items.length;
+  const packed = S.items.filter(i=>i.state==='packed').length;
+  const pct = total ? Math.round(packed/total*100) : 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+}
+
+// ── DRAG & DROP ───────────────────────────────────────────────────────────
+function attachDrag(row) {
+  row.addEventListener('dragstart', e => {
+    dragId = row.dataset.id;
+    dragFromCat = row.closest('.cat-section').dataset.catId;
+    row.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    // show sidebar dropzones
+    document.querySelectorAll('.sidebar-dropzone').forEach(dz=>dz.classList.add('vis'));
+  });
+  row.addEventListener('dragend', () => {
+    row.classList.remove('dragging');
+    document.querySelectorAll('.drop-above').forEach(r=>r.classList.remove('drop-above'));
+    document.querySelectorAll('.sidebar-dropzone').forEach(dz=>{ dz.classList.remove('vis','over'); });
+    dragId=null; dragFromCat=null;
+  });
+  row.addEventListener('dragover', e => {
+    e.preventDefault();
+    document.querySelectorAll('.drop-above').forEach(r=>r.classList.remove('drop-above'));
+    row.classList.add('drop-above');
+  });
+  row.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!dragId || dragId===row.dataset.id) return;
+    const src = S.items.find(i=>i.id===dragId);
+    const tgt = S.items.find(i=>i.id===row.dataset.id);
+    if (!src||!tgt||src.catId!==tgt.catId) return;
+    const tmp=src.order; src.order=tgt.order; tgt.order=tmp;
+    save(); render();
+  });
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────
+function toggle(id) {
+  const it = S.items.find(i=>i.id===id);
+  if (!it) return;
+  it.state = it.state==='packed' ? 'grey' : 'packed';
+  save(); render();
+}
+
+function updateText(id, el) {
+  const t = el.textContent.trim();
+  const it = S.items.find(i=>i.id===id);
+  if (!it) return;
+  if (!t) { deleteItem(id); return; }
+  if (it.text !== t) { it.text=t; save(); }
+}
+
+function deleteItem(id) {
+  S.items = S.items.filter(i=>i.id!==id);
+  save(); render();
+}
+
+function moveItemToCat(id, catId) {
+  const it = S.items.find(i=>i.id===id);
+  if (!it||it.catId===catId) return;
+  it.catId=catId;
+  const others = S.items.filter(i=>i.catId===catId&&i.id!==id);
+  it.order = others.length ? Math.max(...others.map(i=>i.order))+1 : 0;
+  save(); render();
+}
+
+function addItemFromBar() {
+  const inp = document.getElementById('bar-item-inp');
+  const text = inp.value.trim();
+  const catId = document.getElementById('bar-cat-sel').value;
+  if (!text||!catId) return;
+  const others = S.items.filter(i=>i.catId===catId);
+  const maxOrd = others.length ? Math.max(...others.map(i=>i.order)) : -1;
+  S.items.push({id:uid(),catId,text,state:'grey',order:maxOrd+1});
+  inp.value='';
+  save(); render();
+  // scroll to the category
+  const el = document.getElementById('cat-'+catId);
+  if (el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function addCat() {
+  const inp = document.getElementById('new-cat-inp');
+  const name = inp.value.trim();
+  if (!name) return;
+  const ICONS=['📋','🧳','🎒','👜','👗','💊','📸','🔌','🏖','🎿','🍫','🧴'];
+  const maxOrd = S.categories.length ? Math.max(...S.categories.map(c=>c.order)) : -1;
+  S.categories.push({id:uid(),name,icon:ICONS[S.categories.length%ICONS.length],order:maxOrd+1});
+  inp.value='';
+  save(); render();
+}
+
+function deleteCat(id) {
+  if (!confirm('למחוק קטגוריה וכל הפריטים שלה?')) return;
+  S.categories = S.categories.filter(c=>c.id!==id);
+  S.items = S.items.filter(i=>i.catId!==id);
+  save(); render();
+}
+
+function toggleCat(id) {
+  document.getElementById('cat-'+id)?.classList.toggle('collapsed');
+}
+
+function toggleFilter() {
+  filterOn = !filterOn;
+  document.body.classList.toggle('filter-unpacked', filterOn);
+  const btn = document.getElementById('filter-btn');
+  btn.textContent = filterOn ? '👁 הצג הכל' : '👁 הצג חסרים';
+  btn.className = filterOn ? 'btn btn-active' : 'btn btn-outline';
+}
+
+function resetAll() {
+  if (!confirm('לאפס את כל הסימונים?')) return;
+  S.items.forEach(i=>i.state='grey');
+  save(); render();
+}
+
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── SCROLL SPY ────────────────────────────────────────────────────────────
+window.addEventListener('scroll', ()=>{
+  let cur=null;
+  cats().forEach(c=>{
+    const el=document.getElementById('cat-'+c.id);
+    if(el&&el.getBoundingClientRect().top<=100) cur=c.id;
+  });
+  document.querySelectorAll('.sidebar-link').forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('href')==='#cat-'+cur);
+  });
+},{passive:true});
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+initSync();
+</script>
+</body>
+</html>
