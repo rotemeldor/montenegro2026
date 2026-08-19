@@ -712,6 +712,80 @@ function notesCol(dayId) {
   return db ? db.collection('montenegro_notes').doc(dayId).collection('notes') : null;
 }
 
+function loadNotes(dayId) {
+  const col = notesCol(dayId);
+  if (!col) { renderNotes(dayId, []); return; }
+  col.orderBy('ts').onSnapshot(snap => {
+    const notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderNotes(dayId, notes);
+  }, () => renderNotes(dayId, []));
+}
+
+function renderNotes(dayId, notes) {
+  const list = document.getElementById('notes-list-' + dayId);
+  const count = document.getElementById('notes-count-' + dayId);
+  if (!list) return;
+  count.textContent = notes.length;
+  count.style.display = notes.length ? 'inline' : 'none';
+  if (!notes.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--text-light);padding:4px 0 8px;">No notes yet.</div>';
+    return;
+  }
+  list.innerHTML = notes.map(n => `
+    <div class="note-item">
+      <div style="flex:1">
+        <div class="note-text">${escHtml(n.text)}</div>
+        <div class="note-time">${n.time}</div>
+      </div>
+      <button class="note-delete" data-day="${dayId}" data-doc="${n.id}" title="Remove">✕</button>
+    </div>`).join('');
+  // attach delete listeners via event delegation
+  list.querySelectorAll('.note-delete').forEach(btn => {
+    btn.addEventListener('click', () => deleteNote(btn.dataset.day, btn.dataset.doc));
+  });
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function addNote(dayId) {
+  const input = document.getElementById('notes-input-' + dayId);
+  const text = input.value.trim();
+  if (!text) return;
+  const col = notesCol(dayId);
+  if (!col) return;
+  input.disabled = true;
+  try {
+    await col.add({
+      text,
+      time: new Date().toLocaleString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),
+      ts: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    input.value = '';
+    input.style.height = 'auto';
+    const body = document.getElementById('notes-body-' + dayId);
+    if (!body.classList.contains('open')) toggleNotes(dayId);
+  } catch(e) { alert('Could not save note — check your connection.'); }
+  input.disabled = false;
+}
+
+async function deleteNote(dayId, docId) {
+  if (!confirm('Remove this note?')) return;
+  const col = notesCol(dayId);
+  if (!col) return;
+  try { await col.doc(docId).delete(); }
+  catch(e) { alert('Could not delete note.'); }
+}
+
+function toggleNotes(dayId) {}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+
 document.addEventListener("DOMContentLoaded", function() {
 if (typeof L === "undefined") { console.error("Leaflet not loaded"); return; }
 
@@ -872,74 +946,6 @@ DAYS.forEach((day,di) => {
 // ── FAMILY NOTES (Firebase Firestore — shared across all devices) ─────
 // Firebase init is above DOMContentLoaded
 
-function loadNotes(dayId) {
-  const col = notesCol(dayId);
-  if (!col) { renderNotes(dayId, []); return; }
-  col.orderBy('ts').onSnapshot(snap => {
-    const notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderNotes(dayId, notes);
-  }, () => renderNotes(dayId, []));
-}
-
-function renderNotes(dayId, notes) {
-  const list = document.getElementById('notes-list-' + dayId);
-  const count = document.getElementById('notes-count-' + dayId);
-  if (!list) return;
-  count.textContent = notes.length;
-  count.style.display = notes.length ? 'inline' : 'none';
-  if (!notes.length) {
-    list.innerHTML = '<div style="font-size:13px;color:var(--text-light);padding:4px 0 8px;">No notes yet.</div>';
-    return;
-  }
-  list.innerHTML = notes.map(n => `
-    <div class="note-item">
-      <div style="flex:1">
-        <div class="note-text">${escHtml(n.text)}</div>
-        <div class="note-time">${n.time}</div>
-      </div>
-      <button class="note-delete" onclick="deleteNote('${dayId}','${n.id}')" title="Remove">✕</button>
-    </div>`).join('');
-}
-
-function escHtml(t) {
-  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-async function addNote(dayId) {
-  const input = document.getElementById('notes-input-' + dayId);
-  const text = input.value.trim();
-  if (!text) return;
-  const col = notesCol(dayId);
-  if (!col) return;
-  input.disabled = true;
-  try {
-    await col.add({
-      text,
-      time: new Date().toLocaleString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),
-      ts: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    input.value = '';
-    input.style.height = 'auto';
-    const body = document.getElementById('notes-body-' + dayId);
-    if (!body.classList.contains('open')) toggleNotes(dayId);
-  } catch(e) { alert('Could not save note — check your connection.'); }
-  input.disabled = false;
-}
-
-async function deleteNote(dayId, docId) {
-  if (!confirm('Remove this note?')) return;
-  const col = notesCol(dayId);
-  if (!col) return;
-  try { await col.doc(docId).delete(); }
-  catch(e) { alert('Could not delete note.'); }
-}
-
-function toggleNotes(dayId) {}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
 
 ['day1','day2','day3','day4','day5','day6','day7','day8'].forEach(loadNotes);
 
